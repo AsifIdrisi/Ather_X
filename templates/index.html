@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" href="/static/favicon.ico">
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <title>WeatherGPT</title>
+
+    <!-- Bootstrap 5 -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <!-- Leaflet Map -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <!-- Custom CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <!-- Charts -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js">
+    </script>
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- Sidebar -->
+
+    <aside
+        id="sidebar"
+        class="sidebar"
+    >
+
+        <div class="brand">
+
+            <div class="brand-icon">
+
+                <i class="bi bi-cloud-sun-fill"></i>
+
+            </div>
+
+            <div>
+
+                <h5 class="mb-0">
+                    WeatherGPT
+                </h5>
+
+                <small>
+                    AI Weather Assistant
+                </small>
+
+            </div>
+
+        </div>
+
+        <!-- NEW CHAT -->
+
+        <button
+            class="btn new-chat w-100 mb-4"
+            onclick="newChat()"
+        >
+
+            <i class="bi bi-plus-lg"></i>
+
+            <span data-i18n="new_chat">New Chat</span>
+
+        </button>
+
+        <!-- QUICK ACCESS -->
+
+        <div class="sidebar-title">
+            QUICK ACCESS
+        </div>
+
+        <button
+            class="sidebar-item"
+            onclick="quickQuestion('What is the weather today?')"
+        >
+
+            <i class="bi bi-sun"></i>
+
+            <span data-i18n="todays_weather">
+                Today's Weather
+            </span>
+
+        </button>
+
+        <button
+            class="sidebar-item"
+            onclick="quickQuestion('Will it rain tomorrow?')"
+        >
+
+            <i class="bi bi-cloud-rain"></i>
+
+            <span data-i18n="rain_forecast">
+                Rain Forecast
+            </span>
+
+        </button>
+
+        <button
+            class="sidebar-item"
+            onclick="quickQuestion('Are there any weather alerts?')"
+        >
+
+            <i class="bi bi-exclamation-triangle"></i>
+
+            <span data-i18n="weather_alerts">
+                Weather Alerts
+            </span>
+
+        </button>
+
+        <button
+            class="sidebar-item"
+            onclick="quickQuestion('What is the current temperature?')"
+        >
+
+            <i class="bi bi-thermometer-half"></i>
+
+            <span data-i18n="temperature">
+                Temperature
+            </span>
+
+        </button>
+
+        <!-- SIDEBAR BOTTOM -->
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-tools-divider" data-i18n="weather_insights">WEATHER INSIGHTS</div>
+
+            <div class="insight-group">
+                <button class="insight-group-toggle" type="button" aria-expanded="false" onclick="toggleInsightGroup(this)">
+                    <span>
+                        <i class="bi bi-calendar3"></i>
+                        <span data-i18n="forecast_trends">Forecast &amp; Trends</span>
+                    </span>
+                    <i class="bi bi-chevron-down insight-chevron"></i>
+                </button>
+
+                <div class="insight-group-items" hidden>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('forecast24HourSection')">
+                        <i class="bi bi-clock-history"></i>
+                        <span data-i18n="forecast_24h">24-Hour Forecast</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('forecast7DaySection')">
+                        <i class="bi bi-calendar-week"></i>
+                        <span data-i18n="forecast_7d">7-Day Forecast</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('weatherChartsSection')">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span data-i18n="weather_trends">Weather Trends</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('precipitationSection')">
+                        <i class="bi bi-cloud-rain-heavy-fill"></i>
+                        <span data-i18n="detailed_precipitation">Detailed Precipitation</span>
+                    </button>
+
+                </div>
+            </div>
+            <div class="insight-group">
+
+                <button class="insight-group-toggle" type="button" aria-expanded="false" onclick="toggleInsightGroup(this)">
+                    <span>
+                        <i class="bi bi-shield-check"></i>
+                        <span data-i18n="alerts_safety">Alerts &amp; Safety</span>
+                    </span>
+                    <i class="bi bi-chevron-down insight-chevron"></i>
+                </button>
+
+                <div class="insight-group-items" hidden>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('notificationSection')">
+                        <i class="bi bi-bell-fill"></i>
+                        <span data-i18n="smart_notifications">Smart Notifications</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('smartAlertsSection')">
+                        <i class="bi bi-shield-fill-check"></i>
+                        <span data-i18n="smart_early_warnings">Smart Early Warnings</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('disasterIntelligenceSection')">
+                        <i class="bi bi-shield-exclamation"></i>
+                        <span data-i18n="disaster_intelligence">Disaster Intelligence</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('hazardWarningsSection')">
+                        <i class="bi bi-tsunami"></i>
+                        <span data-i18n="flood_cyclone">Flood &amp; Cyclone Warnings</span>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="insight-group">
+                <button class="insight-group-toggle" type="button" aria-expanded="false" onclick="toggleInsightGroup(this)">
+                    <span>
+                        <i class="bi bi-cpu-fill"></i>
+                        <span data-i18n="weather_intelligence">Weather Intelligence</span>
+                    </span>
+                    <i class="bi bi-chevron-down insight-chevron"></i>
+                </button>
+
+                <div class="insight-group-items" hidden>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('intelligenceSection')">
+                        <i class="bi bi-cpu-fill"></i>
+                        <span data-i18n="weather_intelligence">Weather Intelligence</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('nwpGfsSection')">
+                        <i class="bi bi-cloud-haze2-fill"></i>
+                        <span data-i18n="nwp_gfs">NWP / GFS Model</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('performanceDashboardSection')">
+                        <i class="bi bi-speedometer2"></i>
+                        <span data-i18n="accuracy_performance">Accuracy &amp; Performance</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('recommendationsSection')">
+                        <i class="bi bi-stars"></i>
+                        <span data-i18n="ai_recommendations">AI Recommendations</span>
+                    </button>
+
+                </div>
+
+            </div>
+            <div class="insight-group">
+
+                                <button class="insight-group-toggle" type="button" aria-expanded="false" onclick="toggleInsightGroup(this)">
+                    <span>
+                        <i class="bi bi-globe2"></i>
+                        <span data-i18n="environment_map">Environment &amp; Map</span>
+                    </span>
+                    <i class="bi bi-chevron-down insight-chevron"></i>
+                </button>
+
+                <div class="insight-group-items" hidden>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('weatherMapSection')">
+                        <i class="bi bi-map-fill"></i>
+                        <span data-i18n="weather_map">Interactive Weather Map</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('healthWeatherSection')">
+                        <i class="bi bi-lungs-fill"></i>
+                        <span data-i18n="air_quality_uv">Air Quality &amp; UV</span>
+                    </button>
+
+                </div>
+
+            </div>
+            <div class="insight-group">
+
+                <button class="insight-group-toggle" type="button" aria-expanded="false" onclick="toggleInsightGroup(this)">
+                    <span>
+                        <i class="bi bi-briefcase-fill"></i>
+                        <span data-i18n="sector_advisory">Sector Advisory</span>
+                    </span>
+                    <i class="bi bi-chevron-down insight-chevron"></i>
+                </button>
+
+                <div class="insight-group-items" hidden>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('agricultureAdvisorySection')">
+                        <i class="bi bi-flower1"></i>
+                        <span data-i18n="agriculture_advisory">Agriculture Advisory</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('aviationAdvisorySection')">
+                        <i class="bi bi-airplane-fill"></i>
+                        <span data-i18n="aviation_advisory">Aviation Advisory</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('marineAdvisorySection')">
+                        <i class="bi bi-water"></i>
+                        <span data-i18n="marine_advisory">Marine Advisory</span>
+                    </button>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('urbanAdvisorySection')">
+                        <i class="bi bi-buildings-fill"></i>
+                        <span data-i18n="urban_advisory">Urban / Smart City</span>
+                    </button>
+
+                </div>
+
+            </div>
+            <div class="insight-group">
+
+                <button class="insight-group-toggle" type="button" aria-expanded="false" onclick="toggleInsightGroup(this)">
+                    <span>
+                        <i class="bi bi-bar-chart-steps"></i>
+                        <span data-i18n="climate_history">Climate &amp; History</span>
+                    </span>
+                    <i class="bi bi-chevron-down insight-chevron"></i>
+                </button>
+
+                <div class="insight-group-items" hidden>
+
+                    <button class="sidebar-item insight-child" type="button"
+                        onclick="openWeatherTool('climateHistorySection')">
+                        <i class="bi bi-bar-chart-steps"></i>
+                        <span data-i18n="climate_history">Climate &amp; History</span>
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button class="sidebar-item feature-back-btn" type="button" onclick="showChatHome()">
+                <i class="bi bi-chat-dots-fill"></i>
+                <span data-i18n="back_to_chat">Back to Chat</span>
+            </button>
+
+            <!-- SAVED LOCATIONS -->
+
+            <div class="sidebar-title mt-4" data-i18n="saved_locations">
+                SAVED LOCATIONS
+            </div>
+
+            <div id="savedLocationsList" class="saved-locations-list">
+                <div class="empty-history" data-i18n="no_saved_locations">
+                    No saved locations
+                </div>
+            </div>
+
+            <div class="sidebar-title mt-4" data-i18n="recent_chats">
+                RECENT CHATS
+            </div>
+
+            <div id="historyList">
+                <div class="empty-history" data-i18n="no_recent_chats">
+                    No recent chats
+                </div>
+            </div>
+
+            <div class="sidebar-tools-divider" data-i18n="more_information">
+                MORE INFORMATION
+            </div>
+
+            <button class="sidebar-item" type="button" onclick="openSettings()">
+                <i class="bi bi-gear"></i>
+                <span data-i18n="settings">Settings</span>
+            </button>
+
+            <button class="sidebar-item" type="button" onclick="openAboutWeather()">
+                <i class="bi bi-info-circle"></i>
+                <span data-i18n="about_weathergpt">About WeatherGPT</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+
+    <main class="main-content">
+
+        <!-- Top Bar -->
+
+        <header class="topbar">
+
+            <!-- MENU -->
+
+            <button
+                id="menuBtn"
+                class="menu-btn"
+                onclick="toggleSidebar()"
+            >
+
+                <i class="bi bi-list"></i>
+
+            </button>
+            
+            
+           <!-- Location -->
+
+            <div class="location-box">
+
+                <i class="bi bi-geo-alt-fill"></i>
+
+                <div>
+
+                    <strong id="locationName">
+
+                        Detecting location...
+
+                    </strong>
+
+                    <small id="locationStatus">
+
+                        Getting GPS location
+
+                    </small>
+
+                </div>
+
+            </div>
+            <!-- City Search -->
+
+            <div class="city-search" onclick="openSearchSection()">
+
+                <div class="city-search-box">
+
+                    <div class="search-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+
+                    <input
+                        type="text"
+                        id="citySearchInput"
+                        name="weathergpt-city-query"
+                        data-i18n-placeholder="search_location"
+                        placeholder="Search city, village, area..."
+                        autocomplete="off"
+                        aria-autocomplete="list"
+                        data-lpignore="true"
+                        data-1p-ignore
+                        data-form-type="other"
+                    >
+                    <button
+                        type="button"
+                        onclick="searchCity()"
+                        title="Search location"
+                        class="city-search-btn"
+                    >
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                </div>
+
+                <!-- SEARCH RESULTS -->
+
+                <div
+                    id="searchResults"
+                    class="search-results"
+                ></div>
+
+            </div>
+            <!-- FULL SEARCH SECTION -->
+            <div id="searchSection" class="search-section">
+
+                <div class="search-section-header">
+                    <button
+                        type="button"
+                        class="search-close-btn"
+                        onclick="closeSearchSection()"
+                    >
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+
+                    <h3>Search Location</h3>
+                </div>
+
+                <div class="search-section-box">
+                    <i class="bi bi-search"></i>
+
+                    <input
+                        type="text"
+                        id="fullSearchInput"
+                        placeholder="Search city, village, area..."
+                        autocomplete="off"
+                    >
+
+                    <button
+                        type="button"
+                        class="full-search-btn"
+                        onclick="performFullSearch()"
+                    >
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div id="fullSearchResults" class="full-search-results"></div>
+
+            </div>
+
+            <button
+                id="saveLocationBtn"
+                class="save-location-btn"
+                type="button"
+                onclick="toggleSaveCurrentLocation()"
+                title="Save current location"
+            >
+                <i class="bi bi-star"></i>
+            </button>
+            
+
+            
+                <div id="languageMenu" class="language-menu">
+
+                    <button type="button" onclick="changeAppLanguage('en')">English</button>
+                    <button type="button" onclick="changeAppLanguage('as')">অসমীয়া</button>
+                    <button type="button" onclick="changeAppLanguage('bn')">বাংলা</button>
+                    <button type="button" onclick="changeAppLanguage('brx')">बड़ो</button>
+                    <button type="button" onclick="changeAppLanguage('doi')">डोगरी</button>
+                    <button type="button" onclick="changeAppLanguage('gu')">ગુજરાતી</button>
+                    <button type="button" onclick="changeAppLanguage('hi')">हिन्दी</button>
+                    <button type="button" onclick="changeAppLanguage('kn')">ಕನ್ನಡ</button>
+                    <button type="button" onclick="changeAppLanguage('ks')">کٲشُر</button>
+                    <button type="button" onclick="changeAppLanguage('kok')">कोंकणी</button>
+                    <button type="button" onclick="changeAppLanguage('mai')">मैथिली</button>
+                    <button type="button" onclick="changeAppLanguage('ml')">മലയാളം</button>
+                    <button type="button" onclick="changeAppLanguage('mni')">মৈতৈ</button>
+                    <button type="button" onclick="changeAppLanguage('mr')">मराठी</button>
+                    <button type="button" onclick="changeAppLanguage('ne')">नेपाली</button>
+                    <button type="button" onclick="changeAppLanguage('or')">ଓଡ଼ିଆ</button>
+                    <button type="button" onclick="changeAppLanguage('pa')">ਪੰਜਾਬੀ</button>
+                    <button type="button" onclick="changeAppLanguage('sa')">संस्कृतम्</button>
+                    <button type="button" onclick="changeAppLanguage('sat')">ᱥᱟᱱᱛᱟᱲᱤ</button>
+                    <button type="button" onclick="changeAppLanguage('sd')">سنڌي</button>
+                    <button type="button" onclick="changeAppLanguage('ta')">தமிழ்</button>
+                    <button type="button" onclick="changeAppLanguage('te')">తెలుగు</button>
+                    <button type="button" onclick="changeAppLanguage('ur')">اردو</button>
+
+                </div>
+                <!-- GPS Button -->
+
+                <div class="topbar-actions">
+
+                    <button class="account-btn" type="button" onclick="openAuthModal()" title="Account">
+                        <i class="bi bi-person-circle"></i>
+                        <span id="accountLabel" data-i18n="sign_in">Sign in</span>
+                    </button>
+
+                    <button class="report-btn" type="button" onclick="openWeatherReport()" title="Weather report">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span data-i18n="report">Report</span>
+                    </button>
+
+                    <button
+                        class="location-btn"
+                        onclick="detectLocation({ forceFresh: true })"
+                        title="Detect location"
+                    >
+                        <i class="bi bi-crosshair"></i>
+                    </button>
+
+                    <div class="language-selector">
+
+                        <button
+                            type="button"
+                            id="languageSelectorBtn"
+                            class="language-selector-btn"
+                            onclick="toggleLanguageMenu()"
+                            title="Select language"
+                        >
+                            <i class="bi bi-translate"></i>
+                            <span id="selectedLanguageLabel">English</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+                <!-- LANGUAGE SELECTOR -->
+
+        </header>
+
+        <!-- Chat Area -->
+
+        <section
+            id="chatArea"
+            class="chat-area"
+        >
+
+            <!-- Welcome Screen -->
+
+            <div
+                id="welcomeScreen"
+                class="welcome-screen"
+            >
+
+                <!-- LOGO -->
+
+                <div class="weather-logo">
+
+                    <i class="bi bi-cloud-sun-fill"></i>
+
+                </div>
+
+                <h1>
+
+                    WeatherGPT
+
+                </h1>
+
+                <p data-i18n="your_ai_weather_assistant">
+
+                    Your AI-powered weather assistant
+
+                </p>
+
+                <!-- CURRENT LOCATION -->
+
+                <div class="current-location">
+
+                    <i class="bi bi-geo-alt"></i>
+
+                    <span id="welcomeLocation" data-i18n="detecting_location">
+
+                        Detecting your location...
+
+                    </span>
+
+                </div>
+
+            <!--   <div class="weather-live-info">
+
+                    Live weather data
+
+                </div>
+                -->
+
+                <div class="weather-updated-top" id="weatherUpdated">Updated: --</div>
+                
+
+                <!-- Weather Card -->
+                <div class="weather-dashboard-row" id="weatherDashboardRow">
+                    <div id="weatherAlerts" class="weather-alerts-column"></div>
+                    <div class="weather-card-column">
+                <div class="weather-card">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <small class="weather-label"
+                            data-i18n="current_weather"
+                            >
+                                CURRENT WEATHER
+
+                            </small>
+
+                            <h5
+                                id="weatherLocation"
+                                class="mt-1 mb-0"
+                                data-i18n="your_location"
+                            >
+
+                                Your Location
+
+                            </h5>
+
+                        </div>
+
+                        <div class="weather-icon">
+
+                            <i class="bi bi-cloud-sun-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                    <!-- TEMPERATURE -->
+
+                    <div class="temperature mt-3">
+
+                        <span id="temperature">
+
+                            --
+
+                        </span>
+
+                        <sup>
+
+                            °C
+
+                        </sup>
+
+                    </div>
+
+                    <!-- DESCRIPTION -->
+
+                    <p
+                        id="weatherDescription"
+                        class="weather-description"
+                        data-i18n="weather_data_appear"
+                    >
+                        Weather data will appear here.
+                    </p>
+
+                    <!-- WEATHER DETAILS -->
+
+                    <div class="row g-2 mt-3">
+
+                        <!-- HUMIDITY -->
+
+                        <div class="col-4">
+
+                            <div class="weather-detail">
+
+                                <i class="bi bi-droplet-fill"></i>
+
+                                <small data-i18n="humidity">
+
+                                    Humidity
+
+                                </small>
+
+                                <strong id="humidity">
+
+                                    --%
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        <!-- WIND -->
+
+                        <div class="col-4">
+
+                            <div class="weather-detail">
+
+                                <i class="bi bi-wind"></i>
+
+                                <small data-i18n="wind">
+
+                                    Wind
+
+                                </small>
+
+                                <strong id="wind">
+
+                                    -- km/h
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        <!-- RAIN -->
+
+                        <div class="col-4">
+
+                            <div class="weather-detail">
+
+                                <i class="bi bi-cloud-rain-fill"></i>
+
+                                <small data-i18n="rain">
+
+                                    Rain
+
+                                </small>
+
+                                <strong id="rain">
+
+                                    --%
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                    </div>
+                </div>
+
+                <!-- Air Quality + UV Index -->
+                <section class="health-weather-section feature-panel" id="healthWeatherSection">
+                    <div class="section-title">
+                        <i class="bi bi-heart-pulse-fill"></i>
+                        <span data-i18n="air_quality_uv">Air Quality & UV</span>
+                    </div>
+                    <div class="health-weather-grid">
+                        <div class="health-weather-card">
+                            <div class="health-weather-icon"><i class="bi bi-lungs-fill"></i></div>
+                            <div class="health-weather-content">
+                                <small data-i18n="us_aqi_label">US AQI</small>
+                                <strong id="aqiValue">--</strong>
+                                <span id="aqiLabel">Loading...</span>
+                                <em id="aqiAdvice">--</em>
+                            </div>
+                        </div>
+                        <div class="health-weather-card">
+                            <div class="health-weather-icon"><i class="bi bi-sun-fill"></i></div>
+                            <div class="health-weather-content">
+                                <small data-i18n="uv_index">UV INDEX</small>
+                                <strong id="uvValue">--</strong>
+                                <span id="uvLabel">Loading...</span>
+                                <em id="uvAdvice">--</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="health-weather-source" id="healthWeatherSource">Air quality and UV information from Open-Meteo.</div>
+                </section>
+
+                <!-- 7 Day Forecast -->
+
+                <!-- =====================================================
+                    MODULE 4 - 24 HOUR FORECAST
+                ===================================================== -->
+                <div class="forecast-section feature-panel" id="forecast24HourSection">
+
+                    <div class="section-title">
+                        <i class="bi bi-clock-history"></i>
+                        <span data-i18n="forecast_24h">24-Hour Forecast</span>
+                    </div>
+
+                    <div class="hourly-forecast-subtitle">
+                        <span data-i18n="hourly_forecast_subtitle">Hour-by-hour temperature, rain chance, precipitation and wind
+                        for the next 24 hours.</span>
+                    </div>
+
+                    <div id="hourlyForecastContainer"
+                        class="hourly-forecast-container">
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================================
+                    MODULE 5 - 7 DAY FORECAST
+                ===================================================== -->
+                <div class="forecast-section feature-panel" id="forecast7DaySection">
+
+                    <div class="section-title">
+                        <i class="bi bi-calendar3"></i>
+                        <span data-i18n="forecast_7d">7-Day Forecast</span>
+                    </div>
+
+                    <div id="forecastContainer"
+                        class="forecast-container">
+                    </div>
+
+                </div>
+
+                <!-- Advanced Weather Visualizations -->
+
+                <!-- Climate & Historical Analysis -->
+
+                <section class="nwp-gfs-section feature-panel" id="nwpGfsSection">
+                    <div class="section-title">
+                        <i class="bi bi-cloud-haze2-fill"></i>
+                        <span data-i18n="nwp_gfs_forecast_title">NWP / GFS Model Forecast</span>
+                    </div>
+
+                    <div class="nwp-model-card">
+                        <div class="nwp-model-header">
+                            <div>
+                                <strong data-i18n="noaa_gfs">NOAA GFS</strong>
+                                <small data-i18n="nwp_model_subtitle">Numerical Weather Prediction model via Open-Meteo</small>
+                            </div>
+                            <button type="button" class="city-search-btn" onclick="loadNwpGfs()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh model
+                            </button>
+                        </div>
+                        <div id="nwpGfsStatus" class="nwp-gfs-status">GFS model data will appear for your current location.</div>
+                        <div class="nwp-gfs-summary-grid">
+                            <div class="nwp-summary-card"><small data-i18n="current_temp_caps">CURRENT TEMP</small><strong id="nwpGfsTemp">--</strong></div>
+                            <div class="nwp-summary-card"><small data-i18n="humidity_caps">HUMIDITY</small><strong id="nwpGfsHumidity">--</strong></div>
+                            <div class="nwp-summary-card"><small data-i18n="precipitation_caps">PRECIPITATION</small><strong id="nwpGfsPrecip">--</strong></div>
+                            <div class="nwp-summary-card"><small data-i18n="wind_caps">WIND</small><strong id="nwpGfsWind">--</strong></div>
+                        </div>
+                        <div class="weather-chart-card nwp-chart-card">
+                            <div class="chart-header">
+                                <div>
+                                    <strong data-i18n="gfs_temperature_trend">GFS Temperature Trend</strong>
+                                    <small data-i18n="gfs_next_24h">Next 24 hours from the GFS model</small>
+                                </div>
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <div class="chart-wrapper"><canvas id="nwpGfsChart"></canvas></div>
+                        </div>
+                        <div class="nwp-source" id="nwpGfsSource">Model: NOAA GFS · Provider: Open-Meteo</div>
+                    </div>
+                </section>
+
+                <section class="intelligence-section feature-panel" id="intelligenceSection">
+                    <div class="section-title">
+                        <i class="bi bi-cpu-fill"></i>
+                        <span data-i18n="weather_intelligence">Weather Intelligence</span>
+                    </div>
+                    <div class="intelligence-toolbar">
+                        <div id="intelligenceStatus" class="intelligence-status">Compare GFS, ECMWF and ICON forecast models for the selected location.</div>
+                        <button type="button" class="city-search-btn" onclick="loadWeatherIntelligence()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh analysis
+                        </button>
+                    </div>
+                    <div id="intelligenceConfidenceBadge" class="confidence-indicator confidence-low"><i class="bi bi-shield-question"></i><span>Confidence not calculated</span></div>
+                    <div id="intelligenceDisagreement" class="intelligence-disagreement">Model disagreement will appear here.</div>
+                    <div class="intelligence-summary-grid">
+                        <div class="intelligence-card"><small>CONFIDENCE</small><strong id="intelligenceConfidence">--</strong></div>
+                        <div class="intelligence-card"><small>MODELS</small><strong id="intelligenceModelCount">--</strong></div>
+                        <div class="intelligence-card"><small>TEMP SPREAD</small><strong id="intelligenceTempSpread">--</strong></div>
+                        <div class="intelligence-card"><small>RAIN SPREAD</small><strong id="intelligenceRainSpread">--</strong></div>
+                    </div>
+                    <div id="intelligenceModels" class="intelligence-model-grid"></div>
+                    <div class="intelligence-note">Model output is decision-support information. Follow official IMD warnings for safety-critical decisions.</div>
+                </section>
+
+                <section class="smart-alerts-section feature-panel" id="smartAlertsSection">
+                    <div class="section-title">
+                        <i class="bi bi-shield-fill-check"></i>
+                        <span data-i18n="smart_early_warnings">Smart Early Warnings</span>
+                    </div>
+                    <div class="intelligence-toolbar">
+                        <div id="smartAlertsStatus" class="intelligence-status">Generate a unified alert package using weather, official warnings and available NWP models.</div>
+                        <button type="button" class="city-search-btn" onclick="loadSmartAlerts()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh alerts
+                        </button>
+                    </div>
+                    <div class="smart-alert-overview">
+                        <div><small data-i18n="highest_level_caps">HIGHEST LEVEL</small><strong id="smartAlertHighest">--</strong></div>
+                        <div><small data-i18n="total_alerts_caps">TOTAL ALERTS</small><strong id="smartAlertCount">--</strong></div>
+                    </div>
+                    <div id="smartAlertsList" class="smart-alert-list"></div>
+                </section>
+
+                <!-- Flood & Cyclone Warnings -->
+                <section class="hazard-warnings-section feature-panel" id="hazardWarningsSection">
+                    <div class="section-title">
+                        <i class="bi bi-tsunami"></i>
+                        <span data-i18n="flood_cyclone">Flood &amp; Cyclone Warnings</span>
+                    </div>
+                    <div id="hazardWarningsContent" class="hazard-warnings-content">
+                        <div class="recommendation-loading">
+                            <i class="bi bi-shield-check"></i>
+                            Flood and cyclone risk will appear after weather data loads.
+                        </div>
+                    </div>
+                </section>
+
+                <section class="climate-history-section feature-panel" id="climateHistorySection">
+                    <div class="section-title">
+                        <i class="bi bi-bar-chart-steps"></i>
+                        <span data-i18n="climate_historical_analysis">Climate & Historical Analysis</span>
+                    </div>
+
+                    <div class="climate-history-controls">
+                        <div>
+                            <label for="climateStartYear" data-i18n="from_label">From</label>
+                            <select id="climateStartYear" class="settings-select"></select>
+                        </div>
+                        <div>
+                            <label for="climateEndYear" data-i18n="to_label">To</label>
+                            <select id="climateEndYear" class="settings-select"></select>
+                        </div>
+                        <button type="button" class="city-search-btn climate-load-btn" onclick="loadClimateHistory()">
+                            <i class="bi bi-arrow-clockwise"></i> Analyze
+                        </button>
+                    </div>
+
+                    <div id="climateHistoryStatus" class="climate-history-status">Choose a location to view historical climate trends.</div>
+
+                    <div class="climate-summary-grid">
+                        <div class="climate-summary-card">
+                            <small data-i18n="average_temperature_caps">AVERAGE TEMPERATURE</small>
+                            <strong id="climateAvgTemp">--</strong>
+                            <span id="climateTempTrend">--</span>
+                        </div>
+                        <div class="climate-summary-card">
+                            <small data-i18n="average_annual_rainfall_caps">AVERAGE ANNUAL RAINFALL</small>
+                            <strong id="climateAvgRain">--</strong>
+                            <span id="climateRainTrend">--</span>
+                        </div>
+                    </div>
+
+                    <div class="weather-chart-card climate-chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <strong data-i18n="historical_temp_trend">Historical Temperature Trend</strong>
+                                <small data-i18n="annual_avg_temp_subtitle">Annual average temperature</small>
+                            </div>
+                            <i class="bi bi-thermometer-half"></i>
+                        </div>
+                        <div class="chart-wrapper"><canvas id="climateTemperatureChart"></canvas></div>
+                    </div>
+
+                    <div class="weather-chart-card climate-chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <strong data-i18n="historical_rainfall_trend">Historical Rainfall Trend</strong>
+                                <small data-i18n="total_annual_precip_subtitle">Total annual precipitation</small>
+                            </div>
+                            <i class="bi bi-cloud-rain"></i>
+                        </div>
+                        <div class="chart-wrapper"><canvas id="climateRainChart"></canvas></div>
+                    </div>
+
+                    <div class="climate-history-source" id="climateHistorySource">Historical data source: Open-Meteo Historical Weather API.</div>
+                </section>
+
+                <div class="weather-charts-section feature-panel" id="weatherChartsSection">
+
+                    <div class="section-title">
+                        <i class="bi bi-bar-chart-line-fill"></i>
+                        <span data-i18n="weather_trends">Weather Trends</span>
+                    </div>
+
+                    <div class="weather-chart-grid">
+
+                        <div class="weather-chart-card">
+                            <div class="chart-header">
+                                <div>
+                                    <strong>Next 24 Hours</strong>
+                                    <small>Temperature, rain probability & wind</small>
+                                </div>
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="hourlyWeatherChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="weather-chart-card">
+                            <div class="chart-header">
+                                <div>
+                                    <strong>7-Day Temperature Trend</strong>
+                                    <small>Daily maximum & minimum temperature</small>
+                                </div>
+                                <i class="bi bi-calendar-week"></i>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="dailyWeatherChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Detailed Precipitation -->
+
+                <div class="precipitation-section feature-panel" id="precipitationSection">
+
+                    <div class="section-title">
+                        <i class="bi bi-cloud-rain-heavy-fill"></i>
+                        <span data-i18n="detailed_precipitation">Detailed Precipitation</span>
+                    </div>
+
+                    <div class="precipitation-summary" id="precipitationSummary">
+                        <!-- Rain summary cards will appear here -->
+                    </div>
+
+                    <div class="weather-chart-card precipitation-chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <strong data-i18n="next_24h_rainfall">Next 24 Hours Rainfall</strong>
+                                <small data-i18n="hourly_precip_subtitle">Hourly precipitation and probability</small>
+                            </div>
+                            <i class="bi bi-droplet-fill"></i>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="precipitationChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="precipitation-note" id="precipitationNote">
+                        Rain information will appear when forecast data is available.
+                    </div>
+
+                </div>
+
+                <!-- Smart AI Recommendations -->
+
+                <div class="recommendations-section feature-panel" id="recommendationsSection">
+
+                    <div class="section-title">
+                        <i class="bi bi-stars"></i>
+                        <span data-i18n="smart_ai_recommendations">Smart AI Recommendations</span>
+                    </div>
+
+                    <div class="recommendations-grid" id="recommendationsGrid">
+                        <div class="recommendation-loading">
+                            <i class="bi bi-stars"></i>
+                            Recommendations will appear after weather data loads.
+                        </div>
+                    </div>
+
+                    <div class="recommendation-note" id="recommendationNote">
+                        Suggestions are generated from live weather conditions and the forecast.
+                    </div>
+
+                </div>
+
+                <!-- Disaster Intelligence -->
+                <section class="disaster-intelligence-section feature-panel" id="disasterIntelligenceSection">
+                    <div class="section-title">
+                        <i class="bi bi-shield-exclamation"></i>
+                        <span data-i18n="disaster_intelligence">Disaster Intelligence</span>
+                    </div>
+                    <div id="disasterIntelligenceContent" class="disaster-intelligence-content">
+                        <div class="recommendation-loading">
+                            <i class="bi bi-shield-check"></i>
+                            Multi-hazard risk will appear after weather data loads.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Agriculture Advisory -->
+                <section class="agriculture-advisory-section feature-panel" id="agricultureAdvisorySection">
+                    <div class="section-title">
+                        <i class="bi bi-flower1"></i>
+                        <span data-i18n="agriculture_advisory">Agriculture Advisory</span>
+                    </div>
+
+                    <div class="agriculture-advisory-controls">
+                        <div class="agri-field">
+                            <label for="agriCrop" data-i18n="crop_label">Crop</label>
+                            <select id="agriCrop">
+                                <option value="wheat" data-i18n="crop_wheat">Wheat</option>
+                                <option value="rice" data-i18n="crop_rice">Rice</option>
+                                <option value="maize" data-i18n="crop_maize">Maize</option>
+                                <option value="sugarcane" data-i18n="crop_sugarcane">Sugarcane</option>
+                                <option value="potato" data-i18n="crop_potato">Potato</option>
+                                <option value="mustard" data-i18n="crop_mustard">Mustard</option>
+                                <option value="cotton" data-i18n="crop_cotton">Cotton</option>
+                                <option value="tomato" data-i18n="crop_tomato">Tomato</option>
+                                <option value="vegetables" data-i18n="crop_vegetables">Vegetables</option>
+                            </select>
+                        </div>
+                        <div class="agri-field">
+                            <label for="agriStage" data-i18n="growth_stage_label">Growth Stage</label>
+                            <select id="agriStage">
+                                <option value="Not specified" data-i18n="not_specified">Not specified</option>
+                                <option value="Sowing" data-i18n="stage_sowing">Sowing</option>
+                                <option value="Vegetative" data-i18n="stage_vegetative">Vegetative</option>
+                                <option value="Flowering" data-i18n="stage_flowering">Flowering</option>
+                                <option value="Fruiting / Grain filling" data-i18n="stage_fruiting">Fruiting / Grain filling</option>
+                                <option value="Harvest" data-i18n="stage_harvest">Harvest</option>
+                            </select>
+                        </div>
+                        <div class="agri-field">
+                            <label for="agriSoil" data-i18n="soil_type_label">Soil Type</label>
+                            <select id="agriSoil">
+                                <option value="Not specified" data-i18n="not_specified">Not specified</option>
+                                <option value="Alluvial" data-i18n="soil_alluvial">Alluvial</option>
+                                <option value="Black soil" data-i18n="soil_black">Black soil</option>
+                                <option value="Red soil" data-i18n="soil_red">Red soil</option>
+                                <option value="Sandy" data-i18n="soil_sandy">Sandy</option>
+                                <option value="Clay" data-i18n="soil_clay">Clay</option>
+                                <option value="Loamy" data-i18n="soil_loamy">Loamy</option>
+                            </select>
+                        </div>
+                        <button class="agri-generate-btn" type="button" onclick="loadAgricultureAdvisory()">
+                            <i class="bi bi-magic"></i> Generate Advisory
+                        </button>
+                    </div>
+
+                    <div id="agricultureAdvisoryContent" class="agriculture-advisory-content">
+                        <div class="recommendation-loading">
+                            <i class="bi bi-flower1"></i>
+                            Select crop and field conditions to generate a weather-based advisory.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Aviation Advisory -->
+                <section class="aviation-advisory-section feature-panel" id="aviationAdvisorySection">
+                    <div class="section-title">
+                        <i class="bi bi-airplane-fill"></i>
+                        <span data-i18n="aviation_advisory">Aviation Advisory</span>
+                    </div>
+                    <div id="aviationAdvisoryContent" class="aviation-advisory-content">
+                        <div class="recommendation-loading">
+                            <i class="bi bi-airplane"></i>
+                            Weather-based aviation conditions will appear after weather data loads.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Marine Advisory -->
+                <section class="marine-advisory-section feature-panel" id="marineAdvisorySection">
+                    <div class="section-title">
+                        <i class="bi bi-water"></i>
+                        <span data-i18n="marine_advisory">Marine Advisory</span>
+                    </div>
+                    <div id="marineAdvisoryContent" class="marine-advisory-content">
+                        <div class="recommendation-loading">
+                            <i class="bi bi-water"></i>
+                            Wave, swell and marine weather conditions will appear after weather data loads.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Urban / Smart City Decision Support -->
+                <section class="urban-advisory-section feature-panel" id="urbanAdvisorySection">
+                    <div class="section-title">
+                        <i class="bi bi-buildings-fill"></i>
+                        <span data-i18n="urban_decision_support_title">Urban / Smart City Decision Support</span>
+                    </div>
+                    <div id="urbanAdvisoryContent" class="urban-advisory-content">
+                        <div class="recommendation-loading">
+                            <i class="bi bi-buildings"></i>
+                            City weather-risk intelligence will appear after weather data loads.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Accuracy & Performance Dashboard -->
+                <section class="performance-dashboard-section feature-panel" id="performanceDashboardSection">
+                    <div class="section-title">
+                        <i class="bi bi-speedometer2"></i>
+                        <span data-i18n="accuracy_performance_dashboard">Accuracy & Performance Dashboard</span>
+                    </div>
+                    <div class="performance-header-card">
+                        <div>
+                            <strong>Live Model/Data Quality & Performance</strong>
+                            <small>Runtime metrics for the current WeatherGPT session</small>
+                        </div>
+                        <button type="button" class="city-search-btn" onclick="loadPerformanceDashboard()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div id="performanceDashboardStatus" class="performance-status">Load weather or chat to collect live performance metrics.</div>
+                    <div class="performance-summary-grid">
+                        <div class="performance-card"><small data-i18n="success_rate_caps">SUCCESS RATE</small><strong id="perfSuccessRate">--</strong><span data-i18n="server_requests_label">Server requests</span></div>
+                        <div class="performance-card"><small data-i18n="weather_latency_caps">WEATHER LATENCY</small><strong id="perfWeatherLatency">--</strong><span data-i18n="last_average_label">Last / average</span></div>
+                        <div class="performance-card"><small data-i18n="ai_chat_latency_caps">AI CHAT LATENCY</small><strong id="perfChatLatency">--</strong><span data-i18n="last_average_label">Last / average</span></div>
+                        <div class="performance-card"><small data-i18n="session_requests_caps">SESSION REQUESTS</small><strong id="perfRequestCount">0</strong><span data-i18n="since_server_start_label">Since server start</span></div>
+                    </div>
+                    <div class="performance-columns">
+                        <div class="performance-info-card">
+                            <h4><i class="bi bi-heart-pulse"></i> <span data-i18n="service_health">Service Health</span></h4>
+                            <div id="performanceRouteTable" class="performance-route-table">No route metrics yet.</div>
+                        </div>
+                        <div class="performance-info-card">
+                            <h4><i class="bi bi-bullseye"></i> <span data-i18n="forecast_accuracy">Forecast Accuracy</span></h4>
+                            <div class="accuracy-honest-card">
+                                <strong id="perfAccuracyValue" data-i18n="not_evaluated">Not evaluated</strong>
+                                <p id="perfAccuracyMessage">Accuracy is not guessed or fabricated. Add reference/observed observations to calculate MAE/RMSE in an evaluation dataset.</p>
+                                <span class="accuracy-badge" data-i18n="evaluation_mode">Evaluation mode</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="performance-note">
+                        <i class="bi bi-info-circle"></i> Live session metrics reset when the Flask server restarts. Latency is measured from the browser and server route timings; accuracy requires independent reference observations.
+                    </div>
+                </section>
+
+                <!-- Interactive Weather Map -->
+
+                <div class="weather-map-section feature-panel" id="weatherMapSection">
+
+                    <div class="section-title">
+                        <i class="bi bi-map-fill"></i>
+                        <span data-i18n="weather_map">Interactive Weather Map</span>
+                    </div>
+
+                    <div class="weather-map-card">
+                        <div class="weather-map-toolbar">
+                            <div>
+                                <strong id="weatherMapTitle">Live radar & location</strong>
+                                <small id="weatherMapStatus">Loading map...</small>
+                            </div>
+                            <button class="map-refresh-btn" type="button" onclick="refreshWeatherMap()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="weatherMap" class="weather-map-canvas"></div>
+                        <div class="weather-map-footer">
+                            <span><i class="bi bi-geo-alt-fill"></i> Current location</span>
+                            <span><i class="bi bi-cloud-rain-fill"></i> Radar overlay</span>
+                            <span>Weather data by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Smart Weather Notifications -->
+
+                <div class="notification-section feature-panel" id="notificationSection">
+
+                    <div class="section-title">
+                        <i class="bi bi-bell-fill"></i>
+                        <span data-i18n="smart_weather_notifications">Smart Weather Notifications</span>
+                    </div>
+
+                    <div class="notification-card">
+                        <div class="notification-main">
+                            <div class="notification-icon">
+                                <i class="bi bi-bell"></i>
+                            </div>
+                            <div>
+                                <strong id="notificationTitle">Weather alerts are off</strong>
+                                <small id="notificationStatus">Enable browser notifications to get important weather alerts.</small>
+                            </div>
+                        </div>
+                        <div class="notification-actions">
+                            <button id="notificationBtn" class="notification-btn" type="button" onclick="toggleWeatherNotifications()">
+                                Enable Alerts
+                            </button>
+                            <button class="notification-test-btn" type="button" onclick="sendTestBackgroundPush()">
+                                <i class="bi bi-send"></i> Test Push
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="notification-preferences">
+                        <label><input type="checkbox" id="notifyRain" checked> Rain</label>
+                        <label><input type="checkbox" id="notifyExtreme" checked> Extreme weather</label>
+                        <label><input type="checkbox" id="notifyWind" checked> Strong wind</label>
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- ^ Closes #welcomeScreen. Without this, #messages below was
+                 nesting INSIDE #welcomeScreen, so hiding the welcome screen
+                 (welcome.style.display = "none" in sendMessage) also hid the
+                 chat messages, even though they were added to the DOM fine. -->
+
+            <!-- Chat Messages -->
+
+            <div
+                id="messages"
+                class="messages"
+            ></div>
+
+        </section>
+
+        <!-- Input Area -->
+
+        <div class="input-area">
+
+            <div class="input-box">
+
+                <!-- VOICE -->
+
+                <button
+                    id="voiceBtn"
+                    class="input-button"
+                    onclick="toggleVoice()"
+                    title="Voice input"
+                >
+
+                    <i class="bi bi-mic-fill"></i>
+
+                </button>
+
+                <!-- MESSAGE -->
+
+                <textarea
+                    id="messageInput"
+                    rows="1"
+                    data-i18n-placeholder="ask_weather"
+                    placeholder="Ask WeatherGPT about the weather..."
+                    onkeydown="handleKeyDown(event)"
+                ></textarea>
+
+                <!-- SEND -->
+
+                <button
+                    id="sendBtn"
+                    class="send-button"
+                    onclick="sendMessage()"
+                    title="Send message"
+                >
+
+                    <i class="bi bi-arrow-up"></i>
+
+                </button>
+
+            </div>
+
+            <!-- INPUT FOOTER -->
+
+            <div class="input-footer">
+
+                <span>
+
+                    WeatherGPT can make mistakes.
+                    Verify critical alerts with official sources.
+
+                </span>
+
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="settings-modal" aria-hidden="true">
+    <div class="settings-backdrop" onclick="closeSettings()"></div>
+    <section class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="settings-header">
+            <div>
+                <small>WEATHERGPT</small>
+                <h3 id="settingsTitle" data-i18n="settings_preferences">Settings & Preferences</h3>
+            </div>
+            <button class="settings-close" type="button" onclick="closeSettings()" aria-label="Close settings">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="settings-body">
+            <div class="settings-group">
+                <h6><i class="bi bi-thermometer-half"></i> Temperature Unit</h6>
+                <div class="settings-choice-row">
+                    <label class="settings-choice"><input type="radio" name="temperatureUnit" value="celsius" checked> <span>°C Celsius</span></label>
+                    <label class="settings-choice"><input type="radio" name="temperatureUnit" value="fahrenheit"> <span>°F Fahrenheit</span></label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h6><i class="bi bi-translate"></i> Language</h6>
+                <select id="settingsLanguage" class="settings-select">
+                    <option value="en">English</option>
+                    <option value="as">অসমীয়া</option>
+                    <option value="bn">বাংলা</option>
+                    <option value="brx">बड़ो</option>
+                    <option value="doi">डोगरी</option>
+                    <option value="gu">ગુજરાતી</option>
+                    <option value="hi">हिन्दी</option>
+                    <option value="kn">ಕನ್ನಡ</option>
+                    <option value="ks">کٲشُر</option>
+                    <option value="kok">कोंकणी</option>
+                    <option value="mai">मैथिली</option>
+                    <option value="ml">മലയാളം</option>
+                    <option value="mni">মৈতৈ</option>
+                    <option value="mr">मराठी</option>
+                    <option value="ne">नेपाली</option>
+                    <option value="or">ଓଡ଼ିଆ</option>
+                    <option value="pa">ਪੰਜਾਬੀ</option>
+                    <option value="sa">संस्कृतम्</option>
+                    <option value="sat">ᱥᱟᱱᱛᱟᱲᱤ</option>
+                    <option value="sd">سنڌي</option>
+                    <option value="ta">தமிழ்</option>
+                    <option value="te">తెలుగు</option>
+                    <option value="ur">اردو</option>
+                </select>
+            </div>
+
+            <div class="settings-group">
+                <h6><i class="bi bi-bell"></i> Weather Notifications</h6>
+                <label class="settings-toggle"><input type="checkbox" id="settingsNotifications"> <span>Enable browser weather alerts</span></label>
+                <div class="settings-subchoices">
+                    <label><input type="checkbox" id="settingsNotifyRain" checked> Rain</label>
+                    <label><input type="checkbox" id="settingsNotifyExtreme" checked> Extreme weather</label>
+                    <label><input type="checkbox" id="settingsNotifyWind" checked> Strong wind</label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h6><i class="bi bi-geo-alt"></i> Saved Locations</h6>
+                <div class="settings-stat"><span>Saved places</span><strong id="settingsSavedCount">0 / 8</strong></div>
+                <button class="settings-danger-btn" type="button" onclick="clearSavedLocations()">
+                    <i class="bi bi-trash3"></i> Clear all saved locations
+                </button>
+            </div>
+
+            <div class="settings-group">
+                <h6><i class="bi bi-info-circle"></i> <span data-i18n="about_label">About</span></h6>
+                <p class="settings-about">WeatherGPT is an AI-powered weather assistant that provides real-time weather, forecasts, alerts, air quality, 
+                    and personalized weather insights. It allows users to ask weather-related questions naturally and get simple, easy-to-understand answers.
+                    Our goal is to make weather information smarter, simpler, and more useful for everyday decisions.
+            </div>
+        </div>
+
+        <div class="settings-footer">
+            <button class="settings-secondary-btn" type="button" onclick="resetSettings()">Reset</button>
+            <button class="settings-primary-btn" type="button" onclick="saveSettings()">Save Changes</button>
+        </div>
+    </section>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="authModal" class="auth-modal" aria-hidden="true">
+    <div class="auth-backdrop" onclick="closeAuthModal()"></div>
+    <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <button class="auth-close" type="button" onclick="closeAuthModal()" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        <div class="auth-icon"><i class="bi bi-person-circle"></i></div>
+        <h3 id="authTitle">Welcome to WeatherGPT</h3>
+        <p id="authSubtitle">Sign in to keep your WeatherGPT profile.</p>
+        <div id="authError" class="auth-error" role="alert"></div>
+        <form id="authForm" onsubmit="submitAuth(event)">
+            <div id="authNameWrap" class="auth-field hidden-auth">
+                <label>Name</label><input id="authName" type="text" autocomplete="name" placeholder="Your name">
+            </div>
+            <div class="auth-field">
+                <label>Email</label><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+            </div>
+            <div class="auth-field">
+                <label>Password</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="At least 6 characters" required minlength="6">
+            </div>
+            <button class="auth-submit" type="submit" id="authSubmit">Sign In</button>
+        </form>
+        <button class="auth-switch" type="button" onclick="toggleAuthMode()" id="authSwitch">New here? Create an account</button>
+        <button class="auth-switch" type="button" onclick="openForgotPassword()" id="forgotPasswordLink">Forgot password?</button>
+        <button class="auth-profile-btn hidden-auth" type="button" onclick="openProfileEditor()" id="authProfileBtn"><i class="bi bi-pencil-square"></i> Edit profile</button>
+        <button class="auth-logout hidden-auth" type="button" onclick="logoutUser()" id="authLogout"><i class="bi bi-box-arrow-right"></i> Log out</button>
+    </section>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div id="forgotPasswordModal" class="auth-modal" aria-hidden="true">
+    <div class="auth-backdrop" onclick="closeForgotPassword()"></div>
+    <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="forgotTitle">
+        <button class="auth-close" type="button" onclick="closeForgotPassword()" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        <div class="auth-icon"><i class="bi bi-shield-lock"></i></div>
+        <h3 id="forgotTitle">Reset your password</h3>
+        <p id="forgotSubtitle">Enter your account email and we will send a verification code.</p>
+        <div id="forgotError" class="auth-error" role="alert"></div>
+
+        <div id="forgotStep1">
+            <div class="auth-field">
+                <label>Email</label>
+                <input id="forgotEmail" type="email" autocomplete="email" placeholder="you@example.com">
+            </div>
+            <button class="auth-submit" type="button" onclick="sendResetOTP()">Send OTP</button>
+        </div>
+
+        <div id="forgotStep2" class="hidden-auth">
+            <div class="auth-field">
+                <label>6-digit OTP</label>
+                <input id="forgotOTP" type="text" inputmode="numeric" maxlength="6" placeholder="Enter OTP">
+            </div>
+            <button class="auth-submit" type="button" onclick="verifyResetOTP()">Verify OTP</button>
+        </div>
+
+        <div id="forgotStep3" class="hidden-auth">
+            <div class="auth-field">
+                <label>New password</label>
+                <input id="resetPassword" type="password" minlength="6" placeholder="At least 6 characters">
+            </div>
+            <div class="auth-field">
+                <label>Confirm password</label>
+                <input id="resetPasswordConfirm" type="password" minlength="6" placeholder="Re-enter password">
+            </div>
+            <button class="auth-submit" type="button" onclick="resetForgotPassword()">Update Password</button>
+        </div>
+    </section>
+</div>
+
+<!-- PROFILE EDIT MODAL -->
+<div id="profileModal" class="auth-modal" aria-hidden="true">
+    <div class="auth-backdrop" onclick="closeProfileEditor()"></div>
+    <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+        <button class="auth-close" type="button" onclick="closeProfileEditor()" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        <div class="auth-icon"><i class="bi bi-person-gear"></i></div>
+        <h3 id="profileTitle">Edit Profile</h3>
+        <p>Update your name, email, or password.</p>
+        <div id="profileError" class="auth-error" role="alert"></div>
+        <form onsubmit="saveProfile(event)">
+            <div class="auth-field"><label>Name</label><input id="profileName" type="text" autocomplete="name" required></div>
+            <div class="auth-field"><label>Email</label><input id="profileEmail" type="email" autocomplete="email" required></div>
+            <div class="auth-field"><label>New password <span style="opacity:.65">(optional)</span></label><input id="profilePassword" type="password" minlength="6" placeholder="Leave blank to keep current password"></div>
+            <button class="auth-submit" type="submit">Save Changes</button>
+        </form>
+    </section>
+</div>
+
+<!-- Weather Report Modal -->
+<div id="weatherReportModal" class="report-modal" aria-hidden="true">
+    <div class="report-backdrop" onclick="closeWeatherReport()"></div>
+    <section class="report-panel" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+        <div class="report-header">
+            <div>
+                <small>WEATHERGPT REPORT</small>
+                <h3 id="reportTitle">Weather Report</h3>
+                <span id="reportMeta">Live weather summary</span>
+            </div>
+            <button class="report-close" type="button" onclick="closeWeatherReport()" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div id="weatherReportContent" class="report-content">
+            <div class="report-empty">Load weather data first to generate a report.</div>
+        </div>
+        <div class="report-footer">
+            <button class="report-secondary-btn" type="button" onclick="downloadWeatherJSON()"><i class="bi bi-download"></i> JSON</button>
+            <button class="report-secondary-btn" type="button" onclick="downloadWeatherCSV()"><i class="bi bi-filetype-csv"></i> CSV</button>
+            <button class="report-primary-btn" type="button" onclick="printWeatherReport()"><i class="bi bi-printer"></i> Print / Save PDF</button>
+        </div>
+    </section>
+</div>
+
+<!-- About Weathergpt Modal -->
+<div id="aboutWeatherModal" class="about-modal" aria-hidden="true">
+    <div class="about-backdrop" onclick="closeAboutWeather()"></div>
+    <section class="about-panel" role="dialog" aria-modal="true" aria-labelledby="aboutWeatherTitle">
+        <div class="about-header">
+            <div>
+                <small>WEATHERGPT</small>
+                <h3 id="aboutWeatherTitle">About WeatherGPT</h3>
+            </div>
+            <button class="about-close" type="button" onclick="closeAboutWeather()" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="about-body">
+            <div class="about-hero">
+                <div class="about-icon"><i class="bi bi-cloud-sun-fill"></i></div>
+                <div>
+                    <h4>WeatherGPT – Conversational AI for Weather &amp; Alerts</h4>
+                    <p>SIH26068</p>
+                </div>
+            </div>
+
+            <p class="about-intro">
+                WeatherGPT is an AI-powered weather assistant designed to make weather information
+                simple, conversational, and actionable.
+            </p>
+
+            <div class="about-card">
+                <h5>🎯 Our Purpose</h5>
+                <p>
+                    Instead of only displaying weather data, WeatherGPT helps users understand what the
+                    weather means for them and what actions they can take.
+                </p>
+            </div>
+            </br>
+            <div class="about-card">
+                <h5>✨ Key Features</h5>
+                <ul>
+                    <li>🌤️ Real-time Weather &amp; Forecast</li>
+                    <li>💬 Conversational AI Weather Assistant</li>
+                    <li>⚠️ Weather Alerts &amp; Warnings</li>
+                    <li>🎙️ Voice Input</li>
+                    <li>📊 Weather Trends &amp; Charts</li>
+                    <li>🌧️ Detailed Precipitation</li>
+                    <li>🤖 AI Weather Recommendations</li>
+                    <li>🗺️ Interactive Weather Map</li>
+                    <li>🌬️ Air Quality &amp; UV Index</li>
+                    <li>🔔 Smart Weather Notifications</li>
+                    <li>📍 Saved Locations</li>
+                    <li>👤 User Accounts</li>
+                    <li>📄 Weather Report &amp; Export</li>
+                    <li>🌐 Multi-language Support</li>
+                </ul>
+            </div>
+            </br>
+
+            <div class="about-card about-difference">
+                <h5>⭐ What Makes WeatherGPT Different?</h5>
+                <p>
+                    Traditional weather apps mainly tell users what the weather is. WeatherGPT helps
+                    users understand what the weather means for them.
+                </p>
+                <p>
+                    It combines real-time weather data, location context, forecasts, alerts, and AI
+                    conversation to provide simple, contextual, and actionable weather insights.
+                </p>
+            </div>
+            </br>
+
+            <div class="about-card">
+                <h5>🛠️ Technology</h5>
+                <ul>
+                    <li><strong>Frontend:</strong> HTML, CSS, JavaScript, Bootstrap</li>
+                    <li><strong>Backend:</strong> Python, Flask</li>
+                    <li><strong>AI:</strong> Llama-based AI</li>
+                    <li><strong>Weather Data:</strong> Open-Meteo API</li>
+                    <li><strong>Database:</strong> SQLite</li>
+                    <li><strong>Voice:</strong> Web Speech API</li>
+                </ul>
+            </div>
+            </br>
+
+            <div class="about-card">
+                <h5>🏆 Smart India Hackathon</h5>
+                <p><strong>Project Code:</strong> SIH26068</p>
+                <p><strong>Project:</strong> WeatherGPT – Conversational AI for Weather &amp; Alerts</p>
+            </div>
+            </br>
+
+        </div>
+    </section>
+</div>
+
+<!-- Bootstrap Js -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+<script src="/static/js/translations.js"></script>
+<!-- Custom Js -->
+
+<script
+    src="{{ url_for('static', filename='js/script.js', v='20260915-dynamic-translation-final') }}">
+</script>
+</body>
+
+</html>

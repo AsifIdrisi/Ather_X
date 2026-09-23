@@ -1,0 +1,9 @@
+Flask
+python-dotenv
+openai
+requests
+Werkzeug
+pywebpush>=2.0.0
+paho-mqtt>=2.1.0
+gunicorn>=23.0.0
+google-generativeai>=0.8.0
