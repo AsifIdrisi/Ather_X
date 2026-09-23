@@ -400,7 +400,7 @@ def ask_ai(
 
             return (
                 "Gemini API key is not configured. "
-                "Please check your .env file."
+                "Please check the server environment configuration."
             )
 
         # -------------------------------------------------
